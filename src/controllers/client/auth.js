@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import pool from "../../db/pool";
 import authSchema from '../../schema/auth'
+import {signedCookie} from "cookie-parser";
 
 const registerUser = async (req, res) => {
     const { mail, password, username } = req.body;
@@ -77,8 +78,6 @@ const loginUser = async (req, res) => {
     try {
         const {username, password, mail} = req.body
 
-        const client = pool.connect()
-
         const user = await pool.query(
             'SELECT * FROM users WHERE username = $1', [username]
         )
@@ -87,21 +86,22 @@ const loginUser = async (req, res) => {
             return res.status(400).json({message: 'Неправильный логин или пароль'})
         }
 
-        const matchedPassword = bcrypt.compare(password, user.rows[0].hashed_password)
-
+        const matchedPassword = await bcrypt.compare(password, user.rows[0].hashed_password)
         if(!matchedPassword) {
             return res.status(400).json({message: 'Неправильный пароль'})
         }
 
-        const token = jwt.sign(
+        const accessToken = jwt.sign(
             {id: user.rows[0].id, username: user.rows[0].username},
             `${process.env.JWT_SECRET_KEY}`,
-            {
-                expiresIn: process.env.JWT_EXPIRES_IN
-            }
-        )
+            { expiresIn: '15m' });
 
-        res.cookie('token', token, {
+        const refreshToken = jwt.sign(
+            {id: user.rows[0].id, username: user.rows[0].username},
+            `${process.env.JWT_SECRET_KEY}`,
+            { expiresIn: '7d' });
+
+        res.cookie('refreshToken', refreshToken, {
             secure: true,
             httpOnly: true,
             maxAge: 24 * 60 * 60 * 1000,
@@ -115,6 +115,7 @@ const loginUser = async (req, res) => {
             role: user.rows[0].role,
             image_icon: user.rows[0].image_icon,
             mail: user.rows[0].mail,
+            accessToken: accessToken
         })
 
     } catch (err) {
@@ -127,7 +128,7 @@ const loginUser = async (req, res) => {
 }
  const logoutUser = async (req, res) => {
     try {
-        res.clearCookie('token')
+        res.clearCookie('refreshToken')
         return res.status(200).json({message: 'logout is successfully'})
     } catch (err) {
         if(err.validationError) {
