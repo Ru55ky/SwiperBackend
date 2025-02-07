@@ -1,19 +1,19 @@
-import express, {Express, Request, Response} from "express";
+import express, {Request, Response} from "express";
 import cors from 'cors'
 import { Server } from 'socket.io'
-import 'dotenv/config'
+import dotenv from 'dotenv'
 import socketIoHandler from './src/socket'
 
 const PORT = process.env.PORT
 const app = express()
-
+const cookieParser = require('cookie-parser')
 import {getRooms} from "./src/controllers/client/room";
 import {getAllMessages} from "./src/controllers/client/message"
 import messageRouter from './src/router/message'
 import userRouter from './src/router/user'
 import authRouter from './src/router/auth'
 
-app.options('*', cors());
+dotenv.config()
 
 const corsOptions = {
 	origin: 'http://localhost:3000',
@@ -28,6 +28,7 @@ const corsOptions = {
 
 app.use(express.json())
 app.use(cors(corsOptions));
+app.use(cookieParser(process.env.JWT_EXPIRES_IN))
 
 app.get('/', (req: Request, res: Response) => {
     res.send('Welcome to the chat-room server')
