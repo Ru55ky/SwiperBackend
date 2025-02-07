@@ -1,13 +1,11 @@
-import express, {Express, Request, Response} from "express";
+import express, {Request, Response} from "express";
 import cors from 'cors'
 import { Server } from 'socket.io'
 import dotenv from 'dotenv'
 import socketIoHandler from './src/socket'
-
-const cookieParser = require('cookie-parser')
 const PORT = process.env.PORT
 const app = express()
-
+const cookieParser = require('cookie-parser')
 import {getRooms} from "./src/controllers/client/room";
 import {getAllMessages} from "./src/controllers/client/message"
 import messageRouter from './src/router/message'

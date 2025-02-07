@@ -12,8 +12,9 @@ export default function socketIoHandler (io) {
             try {
                 console.log('Я СРАБОТАЛ1', data)
                 const newMessage = await createMessage(message, user_id, room_id);
-                console.log('Я СРАБОТАЛ2', data)
+
                 io.in(room_id).emit('new_message', newMessage);
+                console.log('Я СРАБОТАЛ2', data, room_id, newMessage);
             } catch (error) {
                 const errorMessage = `Failed to save message. ${error.message}`;
 

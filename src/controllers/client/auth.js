@@ -122,7 +122,9 @@ const loginUser = async (req, res) => {
         if(err.validationError) {
             return res.status(400).json({message: err.message})
         } else {
-            return res.status(500).json({message: err.message})
+            let test = res.status(500).json({message: err.message});
+            console.log(err, err.message)
+            return test
         }
     }
 }
