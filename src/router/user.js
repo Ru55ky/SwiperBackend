@@ -9,7 +9,7 @@ const {
 const {getUser} = require('../controllers/client/user')
 const verifyToken = require('../utils/verifyToken');
 
- router.get('/:id', verifyToken, getUser);
+ router.get('/', verifyToken, getUser);
 // router.put('/', verifyToken, updateUser);
 // router.get('/rooms', verifyToken, getJoinedRooms);
 // router.post('/rooms/:id/remove', verifyToken, removeRoom);
